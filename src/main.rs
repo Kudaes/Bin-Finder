@@ -52,7 +52,7 @@ fn main() {
         let final_pids = remove_pids(all,unwanted);
         for pid in final_pids
         {
-            let phand = dinvoke::open_process(0x0400|0x0010, 0, pid);
+            let phand = dinvoke::open_process(0x1000, 0, pid);
             if phand.0 != 0 && phand.0 != -1
             {
                 let path: Vec<u16> = vec![0; 260];
