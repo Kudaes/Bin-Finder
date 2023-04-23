@@ -1,0 +1,13 @@
+[package]
+name = "check"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+dinvoke = { path = "dinvoke" }
+bindings = { path = "bindings" }
+data = { path = "data" }
+litcrypt = "0.3"
+
+[build-dependencies]
+static_vcruntime = "2.0"
