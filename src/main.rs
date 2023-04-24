@@ -9,29 +9,59 @@ use std::{collections::BTreeSet, iter::FromIterator};
 use bindings::Windows::Win32::System::WindowsProgramming::IO_STATUS_BLOCK;
 use bindings::Windows::Win32::{Foundation::{HANDLE}};
 use data::{PVOID, FILE_PROCESS_IDS_USING_FILE_INFORMATION};
+use getopts::Options;
 
 fn main() {
     unsafe
     {
-
+        let mut reverse = false;
         let args: Vec<String> = env::args().collect();
-
-        if args.len() < 2 || args[1] == "-h" || args[1] == "--help"
-        {
-            print_help();
-            return;
-        } 
-
-        let image = &args[1];
+        let program = args[0].clone();
+        let mut opts = Options::new();
+        opts.optflag("h", "help", "Print this help menu.");
+        opts.optopt("f", "file", "Dll to look for.","");
+        opts.optflag("r", "reverse", "Get processes where the dll is loaded.");
         
-        let f: data::EnumProcesses;
-        let ret: Option<bool>;
+        let matches = match opts.parse(&args[1..]) {
+            Ok(m) => { m }
+            Err(x) => {println!("{}",x);print!("{}",lc!("[x] Invalid arguments. Use -h for detailed help.")); return; }
+        };
+
+        if matches.opt_present("h") {
+            print_usage(&program, opts);
+            return;
+        }
+
+        if !matches.opt_present("f") {
+            print_usage(&program, opts);
+            return;
+        }
+
+        if matches.opt_present("r")
+        {
+           reverse = true;
+        }
+
+        let image = matches.opt_str("f").unwrap();
         let k32 = dinvoke::get_module_base_address(&lc!("kernelbase.dll"));
+
+        let unwanted = get_pid_from_image_path(&image);
+        let unwanted = unwanted.to_vec();
+        let unwanted:Vec<u32> = unwanted.into_iter().map(|x|x as u32).collect();
+        
+        if reverse
+        {
+            print_processes(unwanted[1..].to_vec(), k32);
+            return;
+        }
+
+        let func: data::EnumProcesses;
+        let ret: Option<bool>;
         let pids: Vec<u32> = vec![0;500];
         let mut pids: *mut u32 = pids.as_ptr() as *mut _;
         let needed = 0u32;
         let needed: *mut u32 = std::mem::transmute(&needed);
-        dinvoke::dynamic_invoke!(k32,&lc!("EnumProcesses"),f,ret,pids,500*4,needed);
+        dinvoke::dynamic_invoke!(k32,&lc!("EnumProcesses"),func,ret,pids,500*4,needed);
 
         match ret{
             Some(_x) => {}
@@ -45,13 +75,24 @@ fn main() {
             pids = pids.add(1);
         }
 
-        let unwanted = get_pid_from_image_path(image);
-        let unwanted = unwanted.to_vec();
-
-        let unwanted:Vec<u32> = unwanted.into_iter().map(|x|x as u32).collect();
         let final_pids = remove_pids(all,unwanted);
+        print_processes(final_pids, k32);
+         
+    }   
+
+}
+
+fn print_processes(final_pids: Vec<u32>, k32: isize)
+{
+    unsafe
+    {
         for pid in final_pids
         {
+            if pid == 0
+            {
+                return;
+            }
+
             let phand = dinvoke::open_process(0x1000, 0, pid);
             if phand.0 != 0 && phand.0 != -1
             {
@@ -77,9 +118,8 @@ fn main() {
             {
                 println!("[+] Process with PID {}", pid);
             }
-        }   
-    }   
-
+        }  
+    }
 }
 
 // From https://stackoverflow.com/questions/64019451/how-do-i-remove-the-elements-of-vector-that-occur-in-another-vector-in-rust
@@ -156,16 +196,7 @@ pub fn get_pid_from_image_path(path: &str) -> [usize;500]
     }
 }
 
-fn print_help() {
-    
-    let help = lc!("
-    USAGE:
-        check.exe [OPTIONS] <dll>
-    ARGS:
-        <dll>                       Dll to look for.
-    OPTIONS:
-        -h, --help                  Print help information.
-    ");
-    
-        println!("{}", help);
+fn print_usage(program: &str, opts: Options) {
+    let brief = format!("Usage: {} [options]", program);
+    print!("{}", opts.usage(&brief));
 }

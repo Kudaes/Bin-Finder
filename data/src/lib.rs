@@ -1,5 +1,5 @@
 use std::{collections::BTreeMap, ffi::c_void};
-use bindings::Windows::Win32::{Foundation::{BOOL, HANDLE, HINSTANCE, PSTR}, System::{Diagnostics::Debug::{IMAGE_DATA_DIRECTORY, IMAGE_OPTIONAL_HEADER32, IMAGE_SECTION_HEADER, EXCEPTION_RECORD}, Kernel::UNICODE_STRING, WindowsProgramming::{OBJECT_ATTRIBUTES, IO_STATUS_BLOCK}}, Security::SECURITY_ATTRIBUTES};
+use bindings::Windows::Win32::{Foundation::{BOOL, HANDLE, HINSTANCE, PSTR}, System::{Diagnostics::Debug::{IMAGE_DATA_DIRECTORY, IMAGE_OPTIONAL_HEADER32, IMAGE_SECTION_HEADER, EXCEPTION_RECORD}, Kernel::UNICODE_STRING, WindowsProgramming::{OBJECT_ATTRIBUTES, IO_STATUS_BLOCK}, Threading::{STARTUPINFOW, PROCESS_INFORMATION}}, Security::SECURITY_ATTRIBUTES};
 use winapi::shared::ntdef::LARGE_INTEGER;
 
 pub type PVOID = *mut c_void;
@@ -9,6 +9,8 @@ pub type EntryPoint = extern "system" fn (HINSTANCE, u32, *mut c_void) -> BOOL;
 pub type EnumProcesses = unsafe extern "system" fn (*mut u32, u32, *mut u32) -> bool;
 pub type GetModuleFileNameExW = unsafe extern "system" fn (HANDLE, isize, *mut u16, u32) -> u32;
 pub type CreateFile = unsafe extern "system" fn (*const u16, u32, u32, *const SECURITY_ATTRIBUTES, u32, u32, HANDLE) -> HANDLE;
+pub type CreateProcessW = unsafe extern "system" fn (*const u16, *mut u16, *const SECURITY_ATTRIBUTES, *const SECURITY_ATTRIBUTES, BOOL, u32, *const c_void,
+    *const u16, *const STARTUPINFOW, *mut PROCESS_INFORMATION) -> BOOL;
 pub type LoadLibraryA = unsafe extern "system" fn (PSTR) -> HINSTANCE;
 pub type OpenProcess = unsafe extern "system" fn (u32, i32, u32) -> HANDLE;
 pub type GetLastError = unsafe extern "system" fn () -> u32;
