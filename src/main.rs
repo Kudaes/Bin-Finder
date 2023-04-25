@@ -15,13 +15,15 @@ fn main() {
     unsafe
     {
         let mut reverse = false;
+        let mut quiet = false;
         let args: Vec<String> = env::args().collect();
         let program = args[0].clone();
         let mut opts = Options::new();
         opts.optflag("h", "help", "Print this help menu.");
-        opts.optopt("f", "file", "Dll to look for.","");
-        opts.optflag("r", "reverse", "Get processes where the dll is loaded.");
-        
+        opts.optopt("f", "file", "Binary path to look for.","");
+        opts.optflag("r", "reverse", "Get processes where the binary is loaded.");
+        opts.optflag("q", "quiet", "Reduces cross process activity by not resolving processes' names.");
+
         let matches = match opts.parse(&args[1..]) {
             Ok(m) => { m }
             Err(x) => {println!("{}",x);print!("{}",lc!("[x] Invalid arguments. Use -h for detailed help.")); return; }
@@ -42,6 +44,11 @@ fn main() {
            reverse = true;
         }
 
+        if matches.opt_present("q")
+        {
+           quiet = true;
+        }
+
         let image = matches.opt_str("f").unwrap();
         let k32 = dinvoke::get_module_base_address(&lc!("kernelbase.dll"));
 
@@ -51,7 +58,7 @@ fn main() {
         
         if reverse
         {
-            print_processes(unwanted[1..].to_vec(), k32);
+            print_processes(unwanted[1..].to_vec(), k32, quiet);
             return;
         }
 
@@ -76,13 +83,13 @@ fn main() {
         }
 
         let final_pids = remove_pids(all,unwanted);
-        print_processes(final_pids, k32);
+        print_processes(final_pids, k32, quiet);
          
     }   
 
 }
 
-fn print_processes(final_pids: Vec<u32>, k32: isize)
+fn print_processes(final_pids: Vec<u32>, k32: isize, quiet: bool)
 {
     unsafe
     {
@@ -93,30 +100,41 @@ fn print_processes(final_pids: Vec<u32>, k32: isize)
                 return;
             }
 
+            // PROCESS_QUERY_LIMITED_INFORMATION is enough for Windows 10+ and Windows Server 2016+
+            // If you want to make this compatible with older OS versions, change the desired access mask
+            // to PROCESS_QUERY_INFORMATION | PROCESS_VM_READ
             let phand = dinvoke::open_process(0x1000, 0, pid);
             if phand.0 != 0 && phand.0 != -1
             {
-                let path: Vec<u16> = vec![0; 260];
-                let path: *mut u16 = path .as_ptr() as *mut _;
-                let func: data::GetModuleFileNameExW;
-                let ret: Option<u32>;
-                dinvoke::dynamic_invoke!(k32,&lc!("GetModuleFileNameExW"),func,ret,phand,0,path,260);
-                if ret.unwrap() != 0 
+                if !quiet
                 {
-                    let mut path: *mut u8 = path as *mut _;
-                    print!("[+] ");
-                    for _i in 0..ret.unwrap()
+                    let path: Vec<u16> = vec![0; 260];
+                    let path: *mut u16 = path .as_ptr() as *mut _;
+                    let func: data::GetModuleFileNameExW;
+                    let ret: Option<u32>;
+                    dinvoke::dynamic_invoke!(k32,&lc!("GetModuleFileNameExW"),func,ret,phand,0,path,260);
+                    if ret.unwrap() != 0 
                     {
-                        print!("{}",*path as char);
-                        path = path.add(2);
+                        let mut path: *mut u8 = path as *mut _;
+                        print!("[+] ");
+                        for _i in 0..ret.unwrap()
+                        {
+                            print!("{}",*path as char);
+                            path = path.add(2);
+                        }
+                        print!(" -- PID {}", pid);
+                        println!();
                     }
-                    print!(" - PID: {}", pid);
-                    println!();
+                   
                 }
+                else 
+                {
+                    println!("[+] Process with PID {}", pid);
+                }
+                
             }
             else 
             {
-                println!("[+] Process with PID {}", pid);
             }
         }  
     }
@@ -144,13 +162,25 @@ pub fn get_pid_from_image_path(path: &str) -> [usize;500]
         // 0x80 = FILE_READ_ATTRIBUTES
         // 3 = OPEN_EXISTING
         // 0x00000001|0x00000002|0x00000004 = FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE
-        dinvoke::dynamic_invoke!(k32,"CreateFileW",create_file,create_file_r,file.as_ptr() as *const u16,0x80,0x00000001|0x00000002|0x00000004,ptr::null(),
-                                3,0,HANDLE {0: 0});
+        dinvoke::dynamic_invoke!(
+            k32,
+            "CreateFileW",
+            create_file,
+            create_file_r,
+            file.as_ptr() as *const u16,
+            0x80,
+            0x00000001|0x00000002|0x00000004,
+            ptr::null(),
+            3,
+            0,
+            HANDLE {0: 0}
+        );
         
         let file_handle = create_file_r.unwrap();
         
         if file_handle.0 == -1
         {
+            println!("{}", &lc!("[x] The specified binary does not exist or can't be opened."));
             return [0;500];
         }
 
@@ -176,7 +206,7 @@ pub fn get_pid_from_image_path(path: &str) -> [usize;500]
             {
                 fpi = std::mem::transmute(ptr);
                 let _r = dinvoke::close_handle(file_handle);
-                // Access denied error is thrown if this pointer is not liberated.
+                // Access denied error occurs if this pointer is not liberated.
                 (*iosb).Anonymous.Pointer = ptr::null_mut();
                 return (*fpi).process_id_list;
             }
