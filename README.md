@@ -12,7 +12,7 @@ The tool obtains all the processes where a certain binary is loaded by calling `
 
 If you want to reduce the cross process activity, use the **quiet** mode (`--quiet` or `-q`). In this case, no process handle will be opened, but the tool will only retrieve the PIDs and not the fully qualified paths.
 
-The tool is fully compatible with Win10 and later and Windows Server 2016 and later. For older OS versions,the call to OpenProcess (line src::main.rs:108) requires PROCESS_QUERY_INFORMATION and PROCESS_VM_READ instead of just PROCESS_QUERY_LIMITED_INFORMATION (or you can just stick to the quiet mode which doesn't open any process handle). 
+The tool is fully compatible with Win10 and later and Windows Server 2016 and later. For older OS versions,the call to `OpenProcess` (line `src::main.rs:108`) requires `PROCESS_QUERY_INFORMATION` and `PROCESS_VM_READ` instead of just `PROCESS_QUERY_LIMITED_INFORMATION` (or you can just stick to the quiet mode which doesn't open any process handle). 
 
 # Compilation 
 
@@ -22,8 +22,8 @@ Since we are using [LITCRYPT](https://github.com/anvie/litcrypt.rs) plugin to ob
 
 After that, simply compile the code and execute the tool:
 
-	C:\Users\User\Desktop\bin_finder\bin_finder> cargo build --release
-	C:\Users\User\Desktop\bin_finder\bin_finder\target\release> bin_finder.exe -h
+	C:\Users\User\Desktop\Bin-Finder> cargo build --release
+	C:\Users\User\Desktop\Bin-Finder\target\release> bin_finder.exe -h
 
 # Usage 
 Bin-finder has two different usage modes. The default mode will look for all the processes that don't have loaded the specified binary. For example, we can search for all the processes that do not have loaded the CrowdStrike dll:
