@@ -30,11 +30,13 @@ Bin-finder has two different usage modes. The default mode will look for all the
 
 ![All processes without CS.](/images/find.png "All processes without CS.")
 
+This is pretty useful when we are looking for directories/processes within the EDR's exception list.
+
 If we want to reduce the cross process activity, it can be used the quiet mode to retrieve only the PIDs:
 
 ![All processes without CS.](/images/find_quiet.png "All processes without CS.")
 
-The second usage mode is the reverse lookup, which will look for all the processes that have currently loaded the specified binary. For example, maybe you are interested in getting the PID of the process that is running the StorSvc service. In that case, just make a reverse lookup for the dll that implements the RPC server used by that service:
+The second usage mode is the reverse lookup (flags `-r` or `--reverse`), which will look for all the processes that have currently loaded the specified binary. For example, maybe you are interested in getting the PID of the process that is running the StorSvc service. In that case, just make a reverse lookup for the dll that implements the RPC server used by that service:
 
 ![Reverse lookup.](/images/reverse.png "Reverse lookup.")
 
