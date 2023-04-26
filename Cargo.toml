@@ -1,5 +1,5 @@
 [package]
-name = "dll_finder"
+name = "bin_finder"
 version = "0.1.0"
 edition = "2021"
 

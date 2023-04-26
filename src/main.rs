@@ -100,32 +100,31 @@ fn print_processes(final_pids: Vec<u32>, k32: isize, quiet: bool)
                 return;
             }
 
-            // PROCESS_QUERY_LIMITED_INFORMATION is enough for Windows 10+ and Windows Server 2016+
-            // If you want to make this compatible with older OS versions, change the desired access mask
-            // to PROCESS_QUERY_INFORMATION | PROCESS_VM_READ
-            let phand = dinvoke::open_process(0x1000, 0, pid);
-            if phand.0 != 0 && phand.0 != -1
+            if !quiet
             {
-                if !quiet
+                // PROCESS_QUERY_LIMITED_INFORMATION is enough for Windows 10+ and Windows Server 2016+
+                // If you want to make this compatible with older OS versions, change the desired access mask
+                // to PROCESS_QUERY_INFORMATION | PROCESS_VM_READ
+                let phand = dinvoke::open_process(0x1000, 0, pid);
+                if phand.0 != 0 && phand.0 != -1
                 {
                     let path: Vec<u16> = vec![0; 260];
-                    let path: *mut u16 = path .as_ptr() as *mut _;
-                    let func: data::GetModuleFileNameExW;
-                    let ret: Option<u32>;
-                    dinvoke::dynamic_invoke!(k32,&lc!("GetModuleFileNameExW"),func,ret,phand,0,path,260);
-                    if ret.unwrap() != 0 
-                    {
-                        let mut path: *mut u8 = path as *mut _;
-                        print!("[+] ");
-                        for _i in 0..ret.unwrap()
+                        let path: *mut u16 = path .as_ptr() as *mut _;
+                        let func: data::GetModuleFileNameExW;
+                        let ret: Option<u32>;
+                        dinvoke::dynamic_invoke!(k32,&lc!("GetModuleFileNameExW"),func,ret,phand,0,path,260);
+                        if ret.unwrap() != 0 
                         {
-                            print!("{}",*path as char);
-                            path = path.add(2);
+                            let mut path: *mut u8 = path as *mut _;
+                            print!("[+] ");
+                            for _i in 0..ret.unwrap()
+                            {
+                                print!("{}",*path as char);
+                                path = path.add(2);
+                            }
+                            print!(" -- PID {}", pid);
+                            println!();
                         }
-                        print!(" -- PID {}", pid);
-                        println!();
-                    }
-                   
                 }
                 else 
                 {
@@ -135,6 +134,7 @@ fn print_processes(final_pids: Vec<u32>, k32: isize, quiet: bool)
             }
             else 
             {
+                println!("[+] Process with PID {}", pid);
             }
         }  
     }
