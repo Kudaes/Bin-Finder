@@ -6,7 +6,7 @@ This tool looks for either the processes that have a certain binary loaded or th
 * It allows to obtain the PID of an specific process with a minimum cross process activity (e.g. looking for processes with c:\windows\sytem32\lsass.exe loaded will give us the Lsass' PID).
 * It allows to obtain the PID of a service or an RPC/COM server withouth iterating over each running svchost process.
 
-Maybe you can find other valuable ways to use this tools. All these results are obtained avoiding to iterate over **all the processes in the system** and with a reduced noise.
+Maybe you can find other valuable ways to use this tools. These results are obtained avoiding to iterate over **all the processes in the system** and with a reduced noise.
 
 The tool obtains all the processes where a certain binary is loaded by calling `NtQueryInformationFile` with the flag `FileProcessIdsUsingFileInformation`. Then and only if required, `EnumProcesses` is called to obtain all processes' PID, and finally both results are compared in order to obtain a final PID list. If the tool is not running on quiet mode, the final PIDs are translated into the process main module's fully qualified path.
 
