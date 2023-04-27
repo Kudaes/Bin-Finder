@@ -5,6 +5,7 @@ use_litcrypt!();
 use std::mem::size_of;
 use std::{ptr, env};
 use std::{collections::BTreeSet, iter::FromIterator};
+use winproc::Process;
 
 use bindings::Windows::Win32::System::WindowsProgramming::IO_STATUS_BLOCK;
 use bindings::Windows::Win32::{Foundation::{HANDLE}};
@@ -22,6 +23,7 @@ fn main() {
         opts.optflag("h", "help", "Print this help menu.");
         opts.optopt("f", "file", "Binary path to look for.","");
         opts.optflag("r", "reverse", "Get processes where the binary is loaded.");
+        opts.optflag("l", "list", "Get current process' loaded modules.");
         opts.optflag("q", "quiet", "Reduces cross process activity by not resolving processes' names.");
 
         let matches = match opts.parse(&args[1..]) {
@@ -31,6 +33,11 @@ fn main() {
 
         if matches.opt_present("h") {
             print_usage(&program, opts);
+            return;
+        }
+
+        if matches.opt_present("l") {
+            print_modules();
             return;
         }
 
@@ -72,7 +79,7 @@ fn main() {
 
         match ret{
             Some(_x) => {}
-            None => {println!("[x] EnumProcesses failed!"); return;}
+            None => {println!("{}",&lc!("[x] EnumProcesses failed!")); return;}
         }
 
         let mut all: Vec<u32> = vec![0;500];
@@ -87,6 +94,16 @@ fn main() {
          
     }   
 
+}
+
+fn print_modules()
+{
+    let process = Process::current();
+    let modules = process.module_list().unwrap();
+    for m in modules
+    {
+        println!("[-] {}", m.path().unwrap().display());
+    }
 }
 
 fn print_processes(final_pids: Vec<u32>, k32: isize, quiet: bool)

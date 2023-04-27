@@ -16,6 +16,7 @@ bindings = { path = "bindings" }
 data = { path = "data" }
 litcrypt = "0.3"
 getopts = "0.2"
+winproc = "0.6.4"
 
 [build-dependencies]
 static_vcruntime = "2.0"
