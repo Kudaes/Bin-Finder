@@ -1,42 +1,118 @@
+use bindings::Windows::Win32::{
+    Foundation::{BOOL, HANDLE, HINSTANCE, PSTR},
+    Security::SECURITY_ATTRIBUTES,
+    System::{
+        Diagnostics::Debug::{
+            EXCEPTION_RECORD, IMAGE_DATA_DIRECTORY, IMAGE_OPTIONAL_HEADER32, IMAGE_SECTION_HEADER,
+        },
+        Kernel::UNICODE_STRING,
+        Threading::{PROCESS_INFORMATION, STARTUPINFOW},
+        WindowsProgramming::{IO_STATUS_BLOCK, OBJECT_ATTRIBUTES},
+    },
+};
 use std::{collections::BTreeMap, ffi::c_void};
-use bindings::Windows::Win32::{Foundation::{BOOL, HANDLE, HINSTANCE, PSTR}, System::{Diagnostics::Debug::{IMAGE_DATA_DIRECTORY, IMAGE_OPTIONAL_HEADER32, IMAGE_SECTION_HEADER, EXCEPTION_RECORD}, Kernel::UNICODE_STRING, WindowsProgramming::{OBJECT_ATTRIBUTES, IO_STATUS_BLOCK}, Threading::{STARTUPINFOW, PROCESS_INFORMATION}}, Security::SECURITY_ATTRIBUTES};
 use winapi::shared::ntdef::LARGE_INTEGER;
 
 pub type PVOID = *mut c_void;
 pub type DWORD = u32;
-pub type EAT = BTreeMap<isize,String>;
-pub type EntryPoint = extern "system" fn (HINSTANCE, u32, *mut c_void) -> BOOL;
-pub type EnumProcesses = unsafe extern "system" fn (*mut u32, u32, *mut u32) -> bool;
-pub type GetModuleFileNameExW = unsafe extern "system" fn (HANDLE, isize, *mut u16, u32) -> u32;
-pub type CreateFile = unsafe extern "system" fn (*const u16, u32, u32, *const SECURITY_ATTRIBUTES, u32, u32, HANDLE) -> HANDLE;
-pub type CreateProcessW = unsafe extern "system" fn (*const u16, *mut u16, *const SECURITY_ATTRIBUTES, *const SECURITY_ATTRIBUTES, BOOL, u32, *const c_void,
-    *const u16, *const STARTUPINFOW, *mut PROCESS_INFORMATION) -> BOOL;
-pub type LoadLibraryA = unsafe extern "system" fn (PSTR) -> HINSTANCE;
-pub type OpenProcess = unsafe extern "system" fn (u32, i32, u32) -> HANDLE;
-pub type GetLastError = unsafe extern "system" fn () -> u32;
-pub type CloseHandle = unsafe extern "system" fn (HANDLE) -> i32;
-pub type VirtualFree = unsafe extern "system" fn (PVOID, usize, u32) -> bool;
+pub type EAT = BTreeMap<isize, String>;
+pub type EntryPoint = extern "system" fn(HINSTANCE, u32, *mut c_void) -> BOOL;
+pub type EnumProcesses = unsafe extern "system" fn(*mut u32, u32, *mut u32) -> bool;
+pub type GetModuleFileNameExW = unsafe extern "system" fn(HANDLE, isize, *mut u16, u32) -> u32;
+pub type CreateFile = unsafe extern "system" fn(
+    *const u16,
+    u32,
+    u32,
+    *const SECURITY_ATTRIBUTES,
+    u32,
+    u32,
+    HANDLE,
+) -> HANDLE;
+pub type CreateProcessW = unsafe extern "system" fn(
+    *const u16,
+    *mut u16,
+    *const SECURITY_ATTRIBUTES,
+    *const SECURITY_ATTRIBUTES,
+    BOOL,
+    u32,
+    *const c_void,
+    *const u16,
+    *const STARTUPINFOW,
+    *mut PROCESS_INFORMATION,
+) -> BOOL;
+pub type LoadLibraryA = unsafe extern "system" fn(PSTR) -> HINSTANCE;
+pub type OpenProcess = unsafe extern "system" fn(u32, i32, u32) -> HANDLE;
+pub type GetLastError = unsafe extern "system" fn() -> u32;
+pub type CloseHandle = unsafe extern "system" fn(HANDLE) -> i32;
+pub type VirtualFree = unsafe extern "system" fn(PVOID, usize, u32) -> bool;
 pub type LptopLevelExceptionFilter = usize;
-pub type SetUnhandledExceptionFilter = unsafe extern "system" fn (filter: LptopLevelExceptionFilter) -> LptopLevelExceptionFilter;
-pub type LdrGetProcedureAddress = unsafe extern "system" fn (PVOID, *mut String, u32, *mut PVOID) -> i32;
-pub type NtWriteVirtualMemory = unsafe extern "system" fn (HANDLE, PVOID, PVOID, usize, *mut usize) -> i32;
-pub type NtProtectVirtualMemory = unsafe extern "system" fn (HANDLE, *mut PVOID, *mut usize, u32, *mut u32) -> i32;
-pub type NtAllocateVirtualMemory = unsafe extern "system" fn (HANDLE, *mut PVOID, usize, *mut usize, u32, u32) -> i32;
-pub type NtQueryInformationProcess = unsafe extern "system" fn (HANDLE, u32, PVOID, u32, *mut u32) -> i32;
-pub type NtQuerySystemInformation = unsafe extern "system" fn (u32, PVOID, u32, *mut u32) -> i32;
-pub type NtQueryInformationFile = unsafe extern "system" fn (HANDLE, *mut IO_STATUS_BLOCK, PVOID, u32, u32) -> i32;
-pub type NtDuplicateObject = unsafe extern "system" fn (HANDLE, HANDLE, HANDLE, *mut HANDLE, u32, u32, u32) -> i32;
-pub type NtQueryObject = unsafe extern "system" fn (HANDLE, u32, PVOID, u32, *mut u32) -> i32;
-pub type NtOpenFile = unsafe extern "system" fn (*mut HANDLE, u32, *mut OBJECT_ATTRIBUTES, *mut IO_STATUS_BLOCK, u32, u32) -> i32;
-pub type NtCreateSection = unsafe extern "system" fn (*mut HANDLE, u32, *mut OBJECT_ATTRIBUTES, *mut LARGE_INTEGER, u32, u32, HANDLE) -> i32;
-pub type NtMapViewOfSection = unsafe extern "system" fn (HANDLE, HANDLE, *mut PVOID, usize, usize, *mut LARGE_INTEGER, *mut usize, u32, u32, u32) -> i32;
-pub type NtOpenProcess = unsafe extern "system" fn (*mut HANDLE, u32, *mut OBJECT_ATTRIBUTES, *mut CLIENT_ID) -> i32;
-pub type NtCreateThreadEx = unsafe extern "system" fn (*mut HANDLE, u32, *mut OBJECT_ATTRIBUTES, HANDLE, PVOID, PVOID, u32, usize, usize, usize, *mut PS_ATTRIBUTE_LIST) -> i32;
-pub type RtlAdjustPrivilege = unsafe extern "system" fn (u32, u8, u8, *mut u8) -> i32;
-pub type RtlInitUnicodeString = unsafe extern "system" fn (*mut UNICODE_STRING, *const u16) -> () ;
-pub type RtlZeroMemory = unsafe extern "system" fn (PVOID, usize) -> ();
-pub type RtlQueueWorkItem = unsafe extern "system" fn (usize, PVOID, u32) -> i32;
- 
+pub type SetUnhandledExceptionFilter =
+    unsafe extern "system" fn(filter: LptopLevelExceptionFilter) -> LptopLevelExceptionFilter;
+pub type LdrGetProcedureAddress =
+    unsafe extern "system" fn(PVOID, *mut String, u32, *mut PVOID) -> i32;
+pub type NtWriteVirtualMemory =
+    unsafe extern "system" fn(HANDLE, PVOID, PVOID, usize, *mut usize) -> i32;
+pub type NtProtectVirtualMemory =
+    unsafe extern "system" fn(HANDLE, *mut PVOID, *mut usize, u32, *mut u32) -> i32;
+pub type NtAllocateVirtualMemory =
+    unsafe extern "system" fn(HANDLE, *mut PVOID, usize, *mut usize, u32, u32) -> i32;
+pub type NtQueryInformationProcess =
+    unsafe extern "system" fn(HANDLE, u32, PVOID, u32, *mut u32) -> i32;
+pub type NtQuerySystemInformation = unsafe extern "system" fn(u32, PVOID, u32, *mut u32) -> i32;
+pub type NtQueryInformationFile =
+    unsafe extern "system" fn(HANDLE, *mut IO_STATUS_BLOCK, PVOID, u32, u32) -> i32;
+pub type NtDuplicateObject =
+    unsafe extern "system" fn(HANDLE, HANDLE, HANDLE, *mut HANDLE, u32, u32, u32) -> i32;
+pub type NtQueryObject = unsafe extern "system" fn(HANDLE, u32, PVOID, u32, *mut u32) -> i32;
+pub type NtOpenFile = unsafe extern "system" fn(
+    *mut HANDLE,
+    u32,
+    *mut OBJECT_ATTRIBUTES,
+    *mut IO_STATUS_BLOCK,
+    u32,
+    u32,
+) -> i32;
+pub type NtCreateSection = unsafe extern "system" fn(
+    *mut HANDLE,
+    u32,
+    *mut OBJECT_ATTRIBUTES,
+    *mut LARGE_INTEGER,
+    u32,
+    u32,
+    HANDLE,
+) -> i32;
+pub type NtMapViewOfSection = unsafe extern "system" fn(
+    HANDLE,
+    HANDLE,
+    *mut PVOID,
+    usize,
+    usize,
+    *mut LARGE_INTEGER,
+    *mut usize,
+    u32,
+    u32,
+    u32,
+) -> i32;
+pub type NtOpenProcess =
+    unsafe extern "system" fn(*mut HANDLE, u32, *mut OBJECT_ATTRIBUTES, *mut CLIENT_ID) -> i32;
+pub type NtCreateThreadEx = unsafe extern "system" fn(
+    *mut HANDLE,
+    u32,
+    *mut OBJECT_ATTRIBUTES,
+    HANDLE,
+    PVOID,
+    PVOID,
+    u32,
+    usize,
+    usize,
+    usize,
+    *mut PS_ATTRIBUTE_LIST,
+) -> i32;
+pub type RtlAdjustPrivilege = unsafe extern "system" fn(u32, u8, u8, *mut u8) -> i32;
+pub type RtlInitUnicodeString = unsafe extern "system" fn(*mut UNICODE_STRING, *const u16) -> ();
+pub type RtlZeroMemory = unsafe extern "system" fn(PVOID, usize) -> ();
+pub type RtlQueueWorkItem = unsafe extern "system" fn(usize, PVOID, u32) -> i32;
+
 pub const DLL_PROCESS_DETACH: u32 = 0;
 pub const DLL_PROCESS_ATTACH: u32 = 1;
 pub const DLL_THREAD_ATTACH: u32 = 2;
@@ -62,7 +138,7 @@ pub const GENERIC_EXECUTE: u32 = 0x20000000;
 pub const GENERIC_ALL: u32 = 0x10000000;
 pub const SECTION_ALL_ACCESS: u32 = 0x10000000;
 pub const PROCESS_QUERY_LIMITED_INFORMATION: u32 = 0x1000;
-pub const THREAD_ALL_ACCESS: u32 =  0x000F0000 |  0x00100000 | 0xFFFF;
+pub const THREAD_ALL_ACCESS: u32 = 0x000F0000 | 0x00100000 | 0xFFFF;
 
 //File share flags
 pub const FILE_SHARE_NONE: u32 = 0x0;
@@ -93,26 +169,14 @@ pub const SEC_IMAGE: u32 = 0x1000000;
 
 #[derive(Clone)]
 #[repr(C)]
+#[derive(Default)]
 pub struct PeMetadata {
     pub pe: u32,
     pub is_32_bit: bool,
     pub image_file_header: IMAGE_FILE_HEADER,
     pub opt_header_32: IMAGE_OPTIONAL_HEADER32,
     pub opt_header_64: IMAGE_OPTIONAL_HEADER64,
-    pub sections: Vec<IMAGE_SECTION_HEADER> 
-}
-
-impl Default for PeMetadata {
-    fn default() -> PeMetadata {
-        PeMetadata {
-            pe: u32::default(),
-            is_32_bit: false,
-            image_file_header: IMAGE_FILE_HEADER::default(),
-            opt_header_32: IMAGE_OPTIONAL_HEADER32::default(),
-            opt_header_64: IMAGE_OPTIONAL_HEADER64::default(),
-            sections: Vec::default(),  
-        }
-    }
+    pub sections: Vec<IMAGE_SECTION_HEADER>,
 }
 
 #[repr(C)]
@@ -125,18 +189,18 @@ pub struct PeManualMap {
 #[repr(C)]
 #[derive(Copy, Clone, Default, PartialEq, Debug, Eq)]
 pub struct ApiSetNamespace {
-    pub unused: [u8;12],
-    pub count: i32, // offset 0x0C
+    pub unused: [u8; 12],
+    pub count: i32,        // offset 0x0C
     pub entry_offset: i32, // offset 0x10
 }
 
 #[repr(C)]
 #[derive(Copy, Clone, Default, PartialEq, Debug, Eq)]
 pub struct ApiSetNamespaceEntry {
-    pub unused1: [u8;4],
+    pub unused1: [u8; 4],
     pub name_offset: i32, // offset 0x04
     pub name_length: i32, // offset 0x08
-    pub unused2: [u8;4],
+    pub unused2: [u8; 4],
     pub value_offset: i32, // offset 0x10
     pub value_length: i32, // offset 0x14
 }
@@ -144,15 +208,16 @@ pub struct ApiSetNamespaceEntry {
 #[repr(C)]
 #[derive(Copy, Clone, Default, PartialEq, Debug, Eq)]
 pub struct ApiSetValueEntry {
-    pub flags: i32, // offset 0x00
-    pub name_offset: i32, // offset 0x04
-    pub name_count: i32, // offset 0x08
+    pub flags: i32,        // offset 0x00
+    pub name_offset: i32,  // offset 0x04
+    pub name_count: i32,   // offset 0x08
     pub value_offset: i32, // offset 0x0C
-    pub value_count: i32, // offset 0x10
+    pub value_count: i32,  // offset 0x10
 }
 
 #[derive(Copy, Clone, Default, PartialEq, Debug, Eq)]
 #[repr(C)]
+#[allow(non_camel_case_types)]
 pub struct IMAGE_FILE_HEADER {
     pub machine: u16,
     pub number_of_sections: u16,
@@ -163,45 +228,45 @@ pub struct IMAGE_FILE_HEADER {
     pub characteristics: u16,
 }
 
-#[derive(Copy, Clone,Default)]
+#[derive(Copy, Clone, Default)]
 #[repr(C)] // required to keep fields order, otherwise Rust may change that order randomly
+#[allow(non_camel_case_types)]
 pub struct IMAGE_OPTIONAL_HEADER64 {
-        pub magic: u16, 
-        pub major_linker_version: u8, 
-        pub minor_linker_version: u8, 
-        pub size_of_code: u32, 
-        pub size_of_initialized_data: u32, 
-        pub size_of_unitialized_data: u32, 
-        pub address_of_entry_point: u32, 
-        pub base_of_code: u32, 
-        pub image_base: u64, 
-        pub section_alignment: u32, 
-        pub file_alignment: u32, 
-        pub major_operating_system_version: u16, 
-        pub minor_operating_system_version: u16, 
-        pub major_image_version: u16,
-        pub minor_image_version: u16, 
-        pub major_subsystem_version: u16,
-        pub minor_subsystem_version: u16, 
-        pub win32_version_value: u32, 
-        pub size_of_image: u32, 
-        pub size_of_headers: u32, 
-        pub checksum: u32, 
-        pub subsystem: u16, 
-        pub dll_characteristics: u16, 
-        pub size_of_stack_reserve: u64, 
-        pub size_of_stack_commit: u64, 
-        pub size_of_heap_reserve: u64, 
-        pub size_of_heap_commit: u64, 
-        pub loader_flags: u32, 
-        pub number_of_rva_and_sizes: u32, 
-        pub datas_directory: [IMAGE_DATA_DIRECTORY; 16], 
+    pub magic: u16,
+    pub major_linker_version: u8,
+    pub minor_linker_version: u8,
+    pub size_of_code: u32,
+    pub size_of_initialized_data: u32,
+    pub size_of_unitialized_data: u32,
+    pub address_of_entry_point: u32,
+    pub base_of_code: u32,
+    pub image_base: u64,
+    pub section_alignment: u32,
+    pub file_alignment: u32,
+    pub major_operating_system_version: u16,
+    pub minor_operating_system_version: u16,
+    pub major_image_version: u16,
+    pub minor_image_version: u16,
+    pub major_subsystem_version: u16,
+    pub minor_subsystem_version: u16,
+    pub win32_version_value: u32,
+    pub size_of_image: u32,
+    pub size_of_headers: u32,
+    pub checksum: u32,
+    pub subsystem: u16,
+    pub dll_characteristics: u16,
+    pub size_of_stack_reserve: u64,
+    pub size_of_stack_commit: u64,
+    pub size_of_heap_reserve: u64,
+    pub size_of_heap_commit: u64,
+    pub loader_flags: u32,
+    pub number_of_rva_and_sizes: u32,
+    pub datas_directory: [IMAGE_DATA_DIRECTORY; 16],
 }
 
 #[derive(Copy, Clone, Default, PartialEq, Debug, Eq)]
 #[repr(C)]
-pub struct GUID
-{
+pub struct GUID {
     pub data1: u32,
     pub data2: u16,
     pub data3: u16,
@@ -209,12 +274,14 @@ pub struct GUID
 }
 
 #[repr(C)]
+#[allow(non_camel_case_types)]
 pub struct SYSTEM_HANDLE_INFORMATION {
     pub number_of_handles: u32,
     pub handles: Vec<SYSTEM_HANDLE_TABLE_ENTRY_INFO>,
 }
 
 #[repr(C)]
+#[allow(non_camel_case_types)]
 pub struct SYSTEM_HANDLE_TABLE_ENTRY_INFO {
     pub process_id: u16,
     pub creator_back_trace_index: u16,
@@ -226,53 +293,48 @@ pub struct SYSTEM_HANDLE_TABLE_ENTRY_INFO {
 }
 
 #[repr(C)]
+#[allow(non_camel_case_types)]
 pub struct CLIENT_ID {
     pub unique_process: HANDLE,
     pub unique_thread: HANDLE,
 }
 
-pub struct NtAllocateVirtualMemoryArgs
-{
-    pub handle: HANDLE, 
-    pub base_address: *mut PVOID
-}
-
-pub struct NtOpenProcessArgs
-{
-   pub handle: *mut HANDLE, 
-   pub access: u32, 
-   pub attributes: *mut OBJECT_ATTRIBUTES, 
-   pub client_id: *mut CLIENT_ID
-}
-
-pub struct NtProtectVirtualMemoryArgs
-{
-    pub handle: HANDLE, 
+pub struct NtAllocateVirtualMemoryArgs {
+    pub handle: HANDLE,
     pub base_address: *mut PVOID,
-    pub size: *mut usize, 
-    pub protection: u32
 }
 
-pub struct NtWriteVirtualMemoryArgs
-{
-    pub handle: HANDLE, 
-    pub base_address: PVOID, 
-    pub buffer: PVOID, 
-    pub size: usize
+pub struct NtOpenProcessArgs {
+    pub handle: *mut HANDLE,
+    pub access: u32,
+    pub attributes: *mut OBJECT_ATTRIBUTES,
+    pub client_id: *mut CLIENT_ID,
 }
 
-pub struct NtCreateThreadExArgs
-{
-    pub thread: *mut HANDLE, 
-    pub access: u32, 
-    pub attributes: *mut OBJECT_ATTRIBUTES, 
-    pub process: HANDLE
+pub struct NtProtectVirtualMemoryArgs {
+    pub handle: HANDLE,
+    pub base_address: *mut PVOID,
+    pub size: *mut usize,
+    pub protection: u32,
+}
+
+pub struct NtWriteVirtualMemoryArgs {
+    pub handle: HANDLE,
+    pub base_address: PVOID,
+    pub buffer: PVOID,
+    pub size: usize,
+}
+
+pub struct NtCreateThreadExArgs {
+    pub thread: *mut HANDLE,
+    pub access: u32,
+    pub attributes: *mut OBJECT_ATTRIBUTES,
+    pub process: HANDLE,
 }
 
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct CONTEXT {
-
     pub P1Home: u64,
     pub P2Home: u64,
     pub P3Home: u64,
@@ -311,8 +373,8 @@ pub struct CONTEXT {
     pub R14: u64,
     pub R15: u64,
     pub Rip: u64,
-    pub Anonymous: [u8;4096],
-    pub VectorRegister: [u8; 128*26],
+    pub Anonymous: [u8; 4096],
+    pub VectorRegister: [u8; 128 * 26],
     pub VectorControl: u64,
     pub DebugControl: u64,
     pub LastBranchToRip: u64,
@@ -321,67 +383,68 @@ pub struct CONTEXT {
     pub LastExceptionFromRip: u64,
 }
 
-impl Default for CONTEXT
-{
+impl Default for CONTEXT {
     fn default() -> CONTEXT {
         CONTEXT {
-            P1Home: 0, 
-            P2Home: 0, 
-            P3Home: 0, 
-            P4Home: 0, 
-            P5Home: 0, 
-            P6Home: 0, 
-            ContextFlags: 0, 
-            MxCsr: 0, 
-            SegCs: 0, 
-            SegDs: 0, 
-            SegEs: 0, 
-            SegFs: 0, 
-            SegGs: 0, 
-            SegSs: 0, 
-            EFlags: 0, 
-            Dr0: 0, 
-            Dr1: 0, 
-            Dr2: 0, 
-            Dr3: 0, 
-            Dr6: 0, 
-            Dr7: 0, 
-            Rax: 0, 
-            Rcx: 0, 
-            Rdx: 0, 
-            Rbx: 0, 
-            Rsp: 0, 
-            Rbp: 0, 
-            Rsi: 0, 
-            Rdi: 0, 
-            R8: 0, 
-            R9: 0, 
-            R10: 0, 
-            R11: 0, 
-            R12: 0, 
-            R13: 0, 
-            R14: 0, 
-            R15: 0, 
-            Rip: 0, 
-            Anonymous: [0;4096], 
-            VectorRegister: [0; 128*26], 
-            VectorControl: 0, 
-            DebugControl: 0, 
-            LastBranchToRip: 0, 
-            LastBranchFromRip: 0, 
-            LastExceptionToRip: 0, 
-            LastExceptionFromRip: 0 
+            P1Home: 0,
+            P2Home: 0,
+            P3Home: 0,
+            P4Home: 0,
+            P5Home: 0,
+            P6Home: 0,
+            ContextFlags: 0,
+            MxCsr: 0,
+            SegCs: 0,
+            SegDs: 0,
+            SegEs: 0,
+            SegFs: 0,
+            SegGs: 0,
+            SegSs: 0,
+            EFlags: 0,
+            Dr0: 0,
+            Dr1: 0,
+            Dr2: 0,
+            Dr3: 0,
+            Dr6: 0,
+            Dr7: 0,
+            Rax: 0,
+            Rcx: 0,
+            Rdx: 0,
+            Rbx: 0,
+            Rsp: 0,
+            Rbp: 0,
+            Rsi: 0,
+            Rdi: 0,
+            R8: 0,
+            R9: 0,
+            R10: 0,
+            R11: 0,
+            R12: 0,
+            R13: 0,
+            R14: 0,
+            R15: 0,
+            Rip: 0,
+            Anonymous: [0; 4096],
+            VectorRegister: [0; 128 * 26],
+            VectorControl: 0,
+            DebugControl: 0,
+            LastBranchToRip: 0,
+            LastBranchFromRip: 0,
+            LastExceptionToRip: 0,
+            LastExceptionFromRip: 0,
         }
     }
 }
 
 #[repr(C)]
+#[allow(non_camel_case_types)]
 pub struct EXCEPTION_POINTERS {
     pub exception_record: *mut EXCEPTION_RECORD,
     pub context_record: *mut CONTEXT,
 }
 
 #[repr(C)]
+#[allow(non_camel_case_types)]
 pub struct PS_ATTRIBUTE_LIST {
     pub size: u32,
     pub unk1: u32,
@@ -392,27 +455,27 @@ pub struct PS_ATTRIBUTE_LIST {
     pub unk6: u32,
     pub unk7: *mut u32,
     pub unk8: u32,
-
 }
 
-pub enum ExceptionHandleFunction
-{
+pub enum ExceptionHandleFunction {
     NtOpenProcess,
     NtAllocateVirtualMemory,
     NtWriteVirtualMemory,
     NtProtectVirtualMemory,
-    NtCreateThreadEx
+    NtCreateThreadEx,
 }
 
 #[repr(C)]
 #[derive(Copy, Clone, Default)]
+#[allow(non_camel_case_types)]
 pub struct RUNTIME_FUNCTION {
     pub begin_addr: u32,
     pub end_addr: u32,
-    pub unwind_addr: u32
+    pub unwind_addr: u32,
 }
 
+#[allow(non_camel_case_types)]
 pub struct FILE_PROCESS_IDS_USING_FILE_INFORMATION {
     pub number_of_process_ids_in_list: u32,
-    pub process_id_list: [usize;500],
+    pub process_id_list: [usize; 500],
 }
