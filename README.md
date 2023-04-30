@@ -4,7 +4,7 @@ This tool looks for either the processes that have a certain binary loaded or th
 
 * It allows to detect processes where an specific EDR/AV dll is not loaded. This could lead to EDR's exception detection.
 * It allows to obtain the PID of an specific process with a minimum cross process activity (e.g. looking for processes with c:\windows\sytem32\lsass.exe loaded will give us the Lsass' PID).
-* It allows to obtain the PID of a service or an RPC/COM server withouth iterating over each running svchost process.
+* It allows to obtain the PID of a service or a RPC/COM server withouth iterating over each running svchost process.
 
 Maybe you can find other valuable ways to use this tools. These results are obtained avoiding to iterate over **all the processes in the system** and with a reduced noise.
 
