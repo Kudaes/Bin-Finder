@@ -1,4 +1,3 @@
-fn main()
-{
+fn main() {
     static_vcruntime::metabuild();
 }
