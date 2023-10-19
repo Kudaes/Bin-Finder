@@ -8,7 +8,7 @@ use std::{collections::BTreeSet, iter::FromIterator};
 use winproc::Process;
 
 use bindings::Windows::Win32::System::WindowsProgramming::IO_STATUS_BLOCK;
-use bindings::Windows::Win32::{Foundation::{HANDLE}};
+use bindings::Windows::Win32::Foundation::HANDLE;
 use data::{PVOID, FILE_PROCESS_IDS_USING_FILE_INFORMATION};
 use getopts::Options;
 
