@@ -25,6 +25,18 @@ After that, simply compile the code and execute the tool:
 	C:\Users\User\Desktop\Bin-Finder> cargo build --release
 	C:\Users\User\Desktop\Bin-Finder\target\release> bin_finder.exe -h
 
+ If during compilation you're facing error as visible below, please execute `rustup toolchain install stable-x86_64-pc-windows-gnu` then `rustup default stable-x86_64-pc-windows-gnu`:
+ 
+	error: linker `link.exe` not found
+  	|
+  	= note: program not found
+	note: the msvc targets depend on the msvc linker but `link.exe` was not found
+	note: please ensure that Visual Studio 2017 or later, or Build Tools for Visual Studio were installed with the Visual C++ option.
+	note: VS Code is a different product, and is not sufficient.
+	error: could not compile `proc-macro2` (build script) due to 1 previous error
+	warning: build failed, waiting for other jobs to finish...
+	error: could not compile `syn` (build script) due to 1 previous error
+
 # Usage 
 Bin-finder has two different usage modes. The default mode will look for all the processes that don't have loaded the specified binary. For example, we can search for all the processes that do not have loaded the CrowdStrike dll:
 
